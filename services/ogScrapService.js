@@ -26,42 +26,45 @@ class ogScrapService {
     async extractMetaTags(html) {
         try {
             const $ = cheerio.load(html);
-            let response = {};
-            //looping through all ogTags
-            for (let ogParam in constants.OG_TAG.PARAMS) {
-                let query = constants.OG_TAG.BASE.replace(
-                    "@ogTag@",
-                    constants.OG_TAG.PARAMS[ogParam].key
-                );
-                let data;
-                if (ogParam === 'images') {
-                    let imgSrc = $(query).attr("content");
-                    //making image an array
-                    data = imgSrc ? [imgSrc] : null;
-                } else
-                    data = $(query).attr("content");
-                if (!data && constants.OG_TAG.PARAMS[ogParam].alt) {
-                    //checking for data in alternative tags in case og tags are absent
-                    //alternative tags are defined in constants
-                    query = constants.OG_TAG.PARAMS[ogParam].alt;
-                    if (ogParam === "images") {
-                        data = [];
-                        $(query).each((i, node) => {
-                            let imgSrc = $(node).attr("src");
-                            if (imgSrc && imgSrc.includes('http')) {
-                                data.push(imgSrc);
-                            }
-                        });
-                        response[ogParam] = data;
-                        continue;
-                    }
-                    if (constants.OG_TAG.PARAMS[ogParam].isAltText) {
-                        data = $(query).text();
-                    } else {
-                        data = $(query).attr("content");
-                    }
+            let meta = $('meta');
+            let keys = Object.keys(meta);
+            let response = {}
+            keys.forEach(function (key) {
+                if (!(meta[key].attribs && (meta[key].attribs.property || meta[key].attribs.name))) {
+                    return;
                 }
-                response[ogParam] = data;
+                let property = meta[key].attribs.property || meta[key].attribs.name;
+                let content = meta[key].attribs.content || meta[key].attribs.value;
+                constants.FIELDS.forEach(function (item) {
+                    if (property === item.property) {
+                        if (!item.multiple) {
+                            response[item.fieldName] = content;
+                        } else if (!response[item.fieldName]) {
+                            response[item.fieldName] = [content];
+                        } else if (Array.isArray(response[item.fieldName])) {
+                            response[item.fieldName].push(content);
+                        }
+                    }
+                });
+            });
+            // Get Title if og title not provided
+            if (!response.ogTitle) {
+                response.ogTitle = $('title').text();
+            }
+            // Get meta description tag if og description was not provided
+            if (!response.ogDescription) {
+                response.ogDescription = $('[name="description"]').attr('content');
+            }
+            // Get images src if there is no og:image tag.
+            if (!response.ogImage) {
+                let data = [];
+                $('img').each((i, node) => {
+                    let imgSrc = $(node).attr("src");
+                    if (imgSrc && imgSrc.includes('http')) {
+                        data.push(imgSrc);
+                    }
+                });
+                response.ogImage = data;
             }
             return response;
         } catch (err) {

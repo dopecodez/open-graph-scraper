@@ -36,7 +36,7 @@ describe('Open Graph scraping function check', () => {
                 .post('/ogScrap')
                 .send({ url: "https://duckduckgo.com/?t=hk" });
             expect(res).to.have.status(200);
-            expect(res.body.data).to.have.all.keys('title', 'images', 'description', 'url');
+            expect(res.body.data).to.contain.keys(['ogUrl', 'ogTitle', 'ogSiteName', 'ogUrl', 'ogImage']);
         }
         catch (err) {
             throw err;
