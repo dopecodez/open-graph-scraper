@@ -1,6 +1,6 @@
 # open-graph-scraper
 
-An open graph protocol scraper made with ExpressJS on top of NodeJS and Cheerio. Will get ogTags like title, image, description etc. Implements caching internally using node-cache so that the same requests if cached can be served quicker. Also has unit tests on top of this with Mocha and Chai. For more information on Open Graph Protocol, please check out https://ogp.me/.
+An open graph protocol scraper made with ExpressJS on top of NodeJS and Cheerio. Will get ogTags like title, image, description etc.If Open Graph Protocol tags are not available, searches for other metadata. Implements caching internally using node-cache so that the same requests if cached can be served quicker. Also has unit tests on top of this with Mocha and Chai. For more information on Open Graph Protocol, please check out https://ogp.me/.
 
 If you have any doubts or clarifications on this code, hit me up and I'll try to help you guys out!
 
@@ -39,12 +39,13 @@ npm run test
 
 ## Usage
 
-Once program is up and running, you can call the endpoint with server_ip/ogScrap. By default, the port should be 3000. On your local machine, server_ip would be http://localhost:3000. This is a post request which expects a JSON body as such:
+Once program is up and running, you can call the endpoint with server_ip/ogScrap. By default, the port should be 3000. On your local machine, server_ip would be http://localhost:3000 (if you haven't specified any port). This is a post request which expects a JSON post body as such:
 ```
 {
   "url" : "https://duckduckgo.com/?t=hk"
 }
 ```
+I also hosted the same app on heroku. So you guys can run the api by calling a post request to https://arcane-spire-12570.herokuapp.com/ogScrap with the same body as above and see the magic happen.
 
 ## Built With
 
